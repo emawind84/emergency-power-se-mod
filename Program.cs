@@ -22,6 +22,13 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         /// <summary>
+        /// The minimum current that Solar Panel or other generators can provide 
+        /// before batteries get activated and discharged to provide enough current to the grid.
+        /// The value is in percentage
+        /// </summary>
+        float MinGeneratedCurrentThreshold = 15;
+
+        /// <summary>
         /// whether to use real time (second between calls) or pure UpdateFrequency
         /// for update frequency
         /// </summary>
@@ -260,8 +267,8 @@ namespace IngameScript
             EchoR(string.Format("Solars: {0} MW / {1} MW", Math.Round(totalCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
 
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries);
-            if (totalCurrentOutput / maxCurrentOutput < 0.2)
+            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameGrid);
+            if (totalCurrentOutput / maxCurrentOutput < MinGeneratedCurrentThreshold / 100)
             {
                 EchoR(string.Format("Low current detected: {0} MW", Math.Round(totalCurrentOutput, 2)));
                 batteries.ForEach(battery => {
@@ -273,7 +280,7 @@ namespace IngameScript
                 EchoR("Batteries discharging");
             }
 
-            if (totalCurrentOutput / maxCurrentOutput > 0.2)
+            if (totalCurrentOutput / maxCurrentOutput > MinGeneratedCurrentThreshold / 100)
             {
                 batteries.ForEach(battery => {
                     if (battery.HasCapacityRemaining)
@@ -291,7 +298,7 @@ namespace IngameScript
         void CheckBatteryStatus()
         {
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries);
+            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameGrid);
             var capacity = RemainingBatteryCapacity(batteries);
             EchoR(string.Format("Batteries capacity: {0}%", Math.Round(capacity * 100, 0)));
         }

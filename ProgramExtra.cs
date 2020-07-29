@@ -60,6 +60,11 @@ namespace IngameScript
             return true;
         }
 
+        bool CollectSameGrid(IMyTerminalBlock block)
+        {
+            return block.CubeGrid == Me.CubeGrid;
+        }
+
         /// <summary>
         /// Thrown when we detect that we have taken up too much processing time
         /// and need to put off the rest of the exection until the next call.

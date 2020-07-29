@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEMod-PowerManagement", "SEMod-PowerManagement.csproj", "{00DC5705-E5E6-4BD9-A815-15C4A3D09EB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ED's Emergency Power", "ED's Emergency Power.csproj", "{00DC5705-E5E6-4BD9-A815-15C4A3D09EB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -40,7 +40,7 @@
   <ItemGroup>
     <Compile Include="DisplayTerminal.cs" />
     <Compile Include="Terminal.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="ProgramExtra.cs" />
     <Compile Include="MDK\Bootstrapper.cs" />
     <AdditionalFiles Include="MDK\MDK.options.props">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
