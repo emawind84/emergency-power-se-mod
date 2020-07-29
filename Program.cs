@@ -256,12 +256,19 @@ namespace IngameScript
 
         void CheckCurrentAndDischargeBatteries()
         {
-            var solarPanels = new List<IMySolarPanel>();
-            GridTerminalSystem.GetBlocksOfType<IMySolarPanel>(solarPanels);
+            var currentGenerators = new List<IMyPowerProducer>();
+            GridTerminalSystem.GetBlocksOfType<IMyPowerProducer>(currentGenerators, blk => !(blk is IMyBatteryBlock));
             float totalCurrentOutput = 0; float maxCurrentOutput = 0;
-            solarPanels.ForEach(solarPanel => {
-                totalCurrentOutput += solarPanel.MaxOutput;
-                maxCurrentOutput += 0.160f;
+            currentGenerators.ForEach(generator => {
+                totalCurrentOutput += generator.MaxOutput;
+                if (generator is IMySolarPanel) {
+                    maxCurrentOutput += 0.160f;
+                }
+                else
+                {
+                    maxCurrentOutput += generator.MaxOutput;
+                }
+                
             });
 
             EchoR(string.Format("Solars: {0} MW / {1} MW", Math.Round(totalCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
