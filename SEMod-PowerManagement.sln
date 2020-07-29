@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEMod-PowerManagement", "SEMod-PowerManagement.csproj", "{00DC5705-E5E6-4BD9-A815-15C4A3D09EB3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{00DC5705-E5E6-4BD9-A815-15C4A3D09EB3}.Debug|x64.ActiveCfg = Debug|x64
+		{00DC5705-E5E6-4BD9-A815-15C4A3D09EB3}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {877A2845-1E60-4136-8393-2E6230D8CB0F}
+	EndGlobalSection
+EndGlobal
