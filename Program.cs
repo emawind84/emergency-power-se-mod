@@ -257,10 +257,10 @@ namespace IngameScript
         void CheckCurrentAndDischargeBatteries()
         {
             var currentGenerators = new List<IMyPowerProducer>();
-            GridTerminalSystem.GetBlocksOfType<IMyPowerProducer>(currentGenerators, blk => !(blk is IMyBatteryBlock));
-            float totalCurrentOutput = 0; float maxCurrentOutput = 0;
+            GridTerminalSystem.GetBlocksOfType<IMyPowerProducer>(currentGenerators, blk => !(blk is IMyBatteryBlock) && blk.IsWorking);
+            float actualCurrentOutput = 0; float maxCurrentOutput = 0;
             currentGenerators.ForEach(generator => {
-                totalCurrentOutput += generator.MaxOutput;
+                actualCurrentOutput += generator.MaxOutput;
                 if (generator is IMySolarPanel) {
                     maxCurrentOutput += 0.160f;
                 }
@@ -268,16 +268,15 @@ namespace IngameScript
                 {
                     maxCurrentOutput += generator.MaxOutput;
                 }
-                
             });
 
-            EchoR(string.Format("Solars: {0} MW / {1} MW", Math.Round(totalCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
+            EchoR(string.Format("Available: {0} MW / {1} MW", Math.Round(actualCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
 
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameGrid);
-            if (totalCurrentOutput / maxCurrentOutput < MinGeneratedCurrentThreshold / 100)
+            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameConstruct);
+            if (actualCurrentOutput / maxCurrentOutput < MinGeneratedCurrentThreshold / 100)
             {
-                EchoR(string.Format("Low current detected: {0} MW", Math.Round(totalCurrentOutput, 2)));
+                EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentOutput, 2)));
                 batteries.ForEach(battery => {
                     if (battery.HasCapacityRemaining)
                     {
@@ -287,7 +286,7 @@ namespace IngameScript
                 EchoR("Batteries discharging");
             }
 
-            if (totalCurrentOutput / maxCurrentOutput > MinGeneratedCurrentThreshold / 100)
+            if (actualCurrentOutput / maxCurrentOutput > MinGeneratedCurrentThreshold / 100)
             {
                 batteries.ForEach(battery => {
                     if (battery.HasCapacityRemaining)
@@ -305,7 +304,7 @@ namespace IngameScript
         void CheckBatteryStatus()
         {
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameGrid);
+            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameConstruct);
             var capacity = RemainingBatteryCapacity(batteries);
             EchoR(string.Format("Batteries capacity: {0}%", Math.Round(capacity * 100, 0)));
         }
