@@ -22,16 +22,16 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
-        public static float RemainingBatteryCapacity(List<IMyBatteryBlock> batteries)
+        static float RemainingBatteryCapacity(List<IMyBatteryBlock> batteries)
         {
-            float totalCurrentCapacity = 0; float totalMaxCapacity = 0;
-            for (int i = 0; i < batteries.Count(); i++)
+            float totalStoredPower = 0; float totalMaxStoredPower = 0;
+            foreach (var battery in batteries)
             {
-                totalCurrentCapacity += batteries[i].CurrentStoredPower;
-                totalMaxCapacity += batteries[i].MaxStoredPower;
+                totalStoredPower += battery.CurrentStoredPower;
+                totalMaxStoredPower += battery.MaxStoredPower;
             }
 
-            return totalCurrentCapacity / totalMaxCapacity;
+            return totalStoredPower / totalMaxStoredPower;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace IngameScript
                 throw new PutOffExecutionException();
             return true;
         }
-
+        
         bool CollectSameConstruct(IMyTerminalBlock block)
         {
             return block.IsSameConstructAs(Me);
