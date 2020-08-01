@@ -263,7 +263,7 @@ namespace IngameScript
         void CheckCurrentAndDischargeBatteries()
         {
             var currentGenerators = new List<IMyPowerProducer>();
-            GridTerminalSystem.GetBlocksOfType<IMyPowerProducer>(currentGenerators, blk => !(blk is IMyBatteryBlock) && blk.IsWorking);
+            GridTerminalSystem.GetBlocksOfType<IMyPowerProducer>(currentGenerators, blk => CollectSameConstruct(blk) && !(blk is IMyBatteryBlock) && blk.IsWorking);
             float actualCurrentOutput = 0; float maxCurrentOutput = 0;
             currentGenerators.ForEach(generator => {
                 actualCurrentOutput += generator.MaxOutput;
@@ -294,15 +294,7 @@ namespace IngameScript
 
             if (actualCurrentOutput / maxCurrentOutput > MinGeneratedCurrentThreshold / 100)
             {
-                batteries.ForEach(battery => {
-                    if (battery.HasCapacityRemaining)
-                    {
-                        battery.ChargeMode = ChargeMode.Auto;
-                    } else
-                    {
-                        battery.ChargeMode = ChargeMode.Recharge;
-                    }
-                });
+                batteries.ForEach(battery => battery.ChargeMode = ChargeMode.Recharge);
                 EchoR("Batteries in auto mode");
             }
         }
