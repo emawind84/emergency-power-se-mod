@@ -21,6 +21,10 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        const string ScriptPrefixTag = "EPOWER";
+
+        const string EmergencyPowerTag = ScriptPrefixTag + ":EmergencyPower";
+
         /// <summary>
         /// The minimum current that Solar Panel or other generators can provide 
         /// before batteries get activated and discharged to provide enough current to the grid.
@@ -100,6 +104,8 @@ namespace IngameScript
         /// All of the process steps that TIM will need to take,
         /// </summary>
         readonly Action[] processSteps;
+
+        bool criticalBatteryCapacityDetected = false;
 
         #endregion
 
@@ -273,7 +279,7 @@ namespace IngameScript
             EchoR(string.Format("Available: {0} MW / {1} MW", Math.Round(actualCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
 
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameConstruct);
+            GridTerminalSystem.GetBlocksOfType(batteries, CollectSameConstruct);
             if (actualCurrentOutput / maxCurrentOutput < MinGeneratedCurrentThreshold / 100)
             {
                 EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentOutput, 2)));
@@ -307,6 +313,20 @@ namespace IngameScript
             GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameConstruct);
             var capacity = RemainingBatteryCapacity(batteries);
             EchoR(string.Format("Batteries capacity: {0}%", Math.Round(capacity * 100, 0)));
+
+            var generators = new List<IMyPowerProducer>();
+            GridTerminalSystem.GetBlocksOfType(generators, blk => MyIni.HasSection(blk.CustomData, EmergencyPowerTag));
+
+            if (capacity < 0.2 || (capacity < 0.9 && criticalBatteryCapacityDetected))
+            {
+                criticalBatteryCapacityDetected = true;
+                generators.ForEach(blk => blk.Enabled = true);
+            }
+            else
+            {
+                criticalBatteryCapacityDetected = false;
+                generators.ForEach(blk => blk.Enabled = false);
+            }
         }
 
         /// <summary>
