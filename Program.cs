@@ -113,11 +113,11 @@ namespace IngameScript
 
         const string SCRIPT_NAME = "ED's Emergency Power";
         // current script version
-        const int VERSION_MAJOR = 1, VERSION_MINOR = 0, VERSION_REVISION = 2;
+        const int VERSION_MAJOR = 1, VERSION_MINOR = 0, VERSION_REVISION = 3;
         /// <summary>
         /// Current script update time.
         /// </summary>
-        const string VERSION_UPDATE = "2020-07-30";
+        const string VERSION_UPDATE = "2020-08-02";
         /// <summary>
         /// A formatted string of the script version.
         /// </summary>
