@@ -26,11 +26,14 @@ namespace IngameScript
         const string EmergencyPowerTag = ScriptPrefixTag + ":EmergencyPower";
 
         /// <summary>
-        /// The minimum current that Solar Panel or other generators can provide 
-        /// before batteries get activated and discharged to provide enough current to the grid.
-        /// The value is in percentage
+        /// The minimum current that power generators should provide 
+        /// before batteries get activated and discharged to provide enough current to the grid and the value is in Megawatts
         /// </summary>
-        float MinGeneratedCurrentThreshold = 15;
+        float MinimumOutputThreshold = 1.5f;
+        /// <summary>
+        /// If the batteries go below this threshold reactors will be turned on in order to charge batteries and give enough power to the grid
+        /// </summary>
+        const float CriticalBatteryCapacity = 0.25f;
 
         /// <summary>
         /// whether to use real time (second between calls) or pure UpdateFrequency
@@ -263,7 +266,7 @@ namespace IngameScript
         void CheckCurrentAndDischargeBatteries()
         {
             var currentGenerators = new List<IMyPowerProducer>();
-            GridTerminalSystem.GetBlocksOfType<IMyPowerProducer>(currentGenerators, blk => CollectSameConstruct(blk) && !(blk is IMyBatteryBlock) && blk.IsWorking);
+            GridTerminalSystem.GetBlocksOfType(currentGenerators, blk => CollectSameConstruct(blk) && !(blk is IMyBatteryBlock) && blk.IsWorking);
             float actualCurrentOutput = 0; float maxCurrentOutput = 0;
             currentGenerators.ForEach(generator => {
                 actualCurrentOutput += generator.MaxOutput;
@@ -276,11 +279,11 @@ namespace IngameScript
                 }
             });
 
-            EchoR(string.Format("Available: {0} MW / {1} MW", Math.Round(actualCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
+            EchoR(string.Format("Used: {0}MW / {1}MW", Math.Round(actualCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
 
             var batteries = new List<IMyBatteryBlock>();
             GridTerminalSystem.GetBlocksOfType(batteries, CollectSameConstruct);
-            if (actualCurrentOutput / maxCurrentOutput < MinGeneratedCurrentThreshold / 100)
+            if (actualCurrentOutput < MinimumOutputThreshold)
             {
                 EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentOutput, 2)));
                 batteries.ForEach(battery => {
@@ -292,9 +295,18 @@ namespace IngameScript
                 EchoR("Batteries discharging");
             }
 
-            if (actualCurrentOutput / maxCurrentOutput > MinGeneratedCurrentThreshold / 100)
+            if (actualCurrentOutput > MinimumOutputThreshold)
             {
-                batteries.ForEach(battery => battery.ChargeMode = ChargeMode.Recharge);
+                batteries.ForEach(battery => {
+                    if (battery.HasCapacityRemaining)
+                    {
+                        battery.ChargeMode = ChargeMode.Auto;
+                    }
+                    else
+                    {
+                        battery.ChargeMode = ChargeMode.Recharge;
+                    }
+                });
                 EchoR("Batteries in auto mode");
             }
         }
@@ -302,14 +314,14 @@ namespace IngameScript
         void CheckBatteryStatus()
         {
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType<IMyBatteryBlock>(batteries, CollectSameConstruct);
+            GridTerminalSystem.GetBlocksOfType(batteries, CollectSameConstruct);
             var capacity = RemainingBatteryCapacity(batteries);
             EchoR(string.Format("Batteries capacity: {0}%", Math.Round(capacity * 100, 0)));
 
             var generators = new List<IMyPowerProducer>();
-            GridTerminalSystem.GetBlocksOfType(generators, blk => MyIni.HasSection(blk.CustomData, EmergencyPowerTag));
+            GridTerminalSystem.GetBlocksOfType(generators, blk => CollectSameConstruct(blk) && MyIni.HasSection(blk.CustomData, EmergencyPowerTag));
 
-            if (capacity < 0.2 || (capacity < 0.9 && criticalBatteryCapacityDetected))
+            if (capacity < CriticalBatteryCapacity || (capacity < 0.9 && criticalBatteryCapacityDetected))
             {
                 criticalBatteryCapacityDetected = true;
                 generators.ForEach(blk => blk.Enabled = true);
