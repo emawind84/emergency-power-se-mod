@@ -33,7 +33,11 @@ namespace IngameScript
         /// <summary>
         /// If the batteries go below this threshold reactors will be turned on in order to charge batteries and give enough power to the grid
         /// </summary>
-        const float CriticalBatteryCapacity = 0.25f;
+        const float CriticalBatteryCapacity = 0.2f;
+        /// <summary>
+        /// The overall batteries capacity in order to consider them charged
+        /// </summary>
+        const float ChargedBatteryCapacity = 0.8f;
 
         /// <summary>
         /// whether to use real time (second between calls) or pure UpdateFrequency
@@ -173,8 +177,9 @@ namespace IngameScript
             // initialise the process steps we will need to do
             processSteps = new Action[]
             {
-                CheckCurrentAndDischargeBatteries,
-                CheckBatteryStatus
+                ProcessStepDischargeBatteriesOnLowCurrent,
+                ProcessStepCheckBatteryStatus,
+                ProcessStepRechargeBatteries,
             };
 
             Runtime.UpdateFrequency = FREQUENCY;
@@ -263,7 +268,7 @@ namespace IngameScript
             }
         }
 
-        void CheckCurrentAndDischargeBatteries()
+        void ProcessStepDischargeBatteriesOnLowCurrent()
         {
             var currentGenerators = new List<IMyPowerProducer>();
             GridTerminalSystem.GetBlocksOfType(currentGenerators, blk => CollectSameConstruct(blk) && !(blk is IMyBatteryBlock) && blk.IsWorking);
@@ -287,7 +292,7 @@ namespace IngameScript
             {
                 EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentOutput, 2)));
                 batteries.ForEach(battery => {
-                    if (battery.HasCapacityRemaining)
+                    if (battery.ChargeMode != ChargeMode.Recharge)
                     {
                         battery.ChargeMode = ChargeMode.Discharge;
                     }
@@ -298,20 +303,15 @@ namespace IngameScript
             if (actualCurrentOutput > MinimumOutputThreshold)
             {
                 batteries.ForEach(battery => {
-                    if (battery.HasCapacityRemaining)
+                    if (battery.ChargeMode != ChargeMode.Recharge)
                     {
                         battery.ChargeMode = ChargeMode.Auto;
                     }
-                    else
-                    {
-                        battery.ChargeMode = ChargeMode.Recharge;
-                    }
                 });
-                EchoR("Batteries in auto mode");
             }
         }
 
-        void CheckBatteryStatus()
+        void ProcessStepCheckBatteryStatus()
         {
             var batteries = new List<IMyBatteryBlock>();
             GridTerminalSystem.GetBlocksOfType(batteries, CollectSameConstruct);
@@ -321,7 +321,7 @@ namespace IngameScript
             var generators = new List<IMyPowerProducer>();
             GridTerminalSystem.GetBlocksOfType(generators, blk => CollectSameConstruct(blk) && MyIni.HasSection(blk.CustomData, EmergencyPowerTag));
 
-            if (capacity < CriticalBatteryCapacity || (capacity < 0.9 && criticalBatteryCapacityDetected))
+            if (capacity < CriticalBatteryCapacity || (capacity < ChargedBatteryCapacity && criticalBatteryCapacityDetected))
             {
                 criticalBatteryCapacityDetected = true;
                 generators.ForEach(blk => blk.Enabled = true);
@@ -330,6 +330,42 @@ namespace IngameScript
             {
                 criticalBatteryCapacityDetected = false;
                 generators.ForEach(blk => blk.Enabled = false);
+            }
+        }
+
+        void ProcessStepRechargeBatteries()
+        {
+            var batteries = new List<IMyBatteryBlock>();
+            GridTerminalSystem.GetBlocksOfType(batteries, CollectSameConstruct);
+            if (batteries.Count() == 0)
+            {
+                processStep++;
+                throw new PutOffExecutionException();
+            }
+
+            float remainingCapacity = RemainingBatteryCapacity(batteries);
+
+            if (remainingCapacity < CriticalBatteryCapacity
+                || (remainingCapacity < ChargedBatteryCapacity && criticalBatteryCapacityDetected))
+            {
+                EchoR(string.Format("Charging batteries: {0}%", Math.Round(remainingCapacity * 100, 0)));
+
+                foreach (var battery in batteries)
+                {
+                    battery.ChargeMode = ChargeMode.Recharge;
+                }
+            }
+            else
+            {
+                foreach (var battery in batteries)
+                {
+                    if (battery.ChargeMode != ChargeMode.Discharge)
+                    {
+                        battery.ChargeMode = ChargeMode.Auto;
+                    }
+                }
+
+                processStep++;
             }
         }
 
