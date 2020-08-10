@@ -350,7 +350,7 @@ namespace IngameScript
             {
                 EchoR(string.Format("Charging batteries: {0}%", Math.Round(remainingCapacity * 100, 0)));
 
-                foreach (var battery in batteries)
+                foreach (var battery in batteries.Take(batteries.Count / 2))
                 {
                     battery.ChargeMode = ChargeMode.Recharge;
                 }
