@@ -58,7 +58,7 @@ namespace IngameScript
             }
 
             lcd.ContentType = ContentType.TEXT_AND_IMAGE;
-            lcd.WriteText(program.echoOutput);
+            lcd.WriteText(Program.EchoOutput);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace IngameScript
         {
             //program.EchoR(string.Format("Collecting {0}", terminal.CustomName));
             // Collect this.
-            bool isDebugLCD = terminal.IsSameConstructAs(program.Me)
+            bool isDebugLCD = terminal.IsSameConstructAs(Program.Me)
                 && MyIni.HasSection(terminal.CustomData, sectionName)
                 && (terminal is IMyTextPanel || terminal is IMyTextSurfaceProvider)
                 && terminal.IsWorking;

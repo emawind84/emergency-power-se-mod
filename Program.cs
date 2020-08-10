@@ -33,11 +33,11 @@ namespace IngameScript
         /// <summary>
         /// If the batteries go below this threshold reactors will be turned on in order to charge batteries and give enough power to the grid
         /// </summary>
-        const float CriticalBatteryCapacity = 0.2f;
+        float CriticalBatteryCapacity = 0.2f;
         /// <summary>
         /// The overall batteries capacity in order to consider them charged
         /// </summary>
-        const float ChargedBatteryCapacity = 0.8f;
+        float ChargedBatteryCapacity = 0.8f;
 
         /// <summary>
         /// whether to use real time (second between calls) or pure UpdateFrequency
@@ -67,12 +67,12 @@ namespace IngameScript
         /// A wrapper for the <see cref="Echo"/> function that adds the log to the stored log.
         /// This allows the log to be remembered and re-outputted without extra work.
         /// </summary>
-        public Action<string> EchoR;
+        Action<string> EchoR;
         /// <summary>
         /// Stores the output of Echo so we can effectively ignore some calls
         /// without overwriting it.
         /// </summary>
-        public StringBuilder echoOutput = new StringBuilder();
+        public StringBuilder EchoOutput = new StringBuilder();
         /// <summary>
         /// Defines the terminalCycle.
         /// </summary>
@@ -120,11 +120,11 @@ namespace IngameScript
 
         const string SCRIPT_NAME = "ED's Emergency Power";
         // current script version
-        const int VERSION_MAJOR = 1, VERSION_MINOR = 0, VERSION_REVISION = 4;
+        const int VERSION_MAJOR = 1, VERSION_MINOR = 0, VERSION_REVISION = 5;
         /// <summary>
         /// Current script update time.
         /// </summary>
-        const string VERSION_UPDATE = "2020-08-04";
+        const string VERSION_UPDATE = "2020-08-10";
         /// <summary>
         /// A formatted string of the script version.
         /// </summary>
@@ -167,7 +167,7 @@ namespace IngameScript
             // init echo wrapper
             EchoR = log =>
             {
-                echoOutput.AppendLine(log);
+                EchoOutput.AppendLine(log);
                 Echo(log);
             };
 
@@ -204,7 +204,7 @@ namespace IngameScript
                     currentCycleStartTime = n;
                 else
                 {
-                    Echo(echoOutput.ToString()); // ensure that output is not lost
+                    Echo(EchoOutput.ToString()); // ensure that output is not lost
                     return;
                 }
             }
@@ -213,7 +213,7 @@ namespace IngameScript
                 currentCycleStartTime = DateTime.Now;
             }
 
-            echoOutput.Clear();
+            EchoOutput.Clear();
             if (processStep == processSteps.Count())
             {
                 processStep = 0;
@@ -348,12 +348,16 @@ namespace IngameScript
             if (remainingCapacity < CriticalBatteryCapacity
                 || (remainingCapacity < ChargedBatteryCapacity && criticalBatteryCapacityDetected))
             {
-                EchoR(string.Format("Charging batteries: {0}%", Math.Round(remainingCapacity * 100, 0)));
-
-                foreach (var battery in batteries.Take(batteries.Count / 2))
+                var batteriesToCharge = Convert.ToInt16(batteries.Count / 2 + 0.5f);
+                foreach (var battery in batteries.Skip(batteriesToCharge))
+                {
+                    battery.ChargeMode = ChargeMode.Auto;
+                }
+                foreach (var battery in batteries.Take(batteriesToCharge))
                 {
                     battery.ChargeMode = ChargeMode.Recharge;
                 }
+                EchoR(string.Format("Charging batteries: {0}%", Math.Round(remainingCapacity * 100, 0)));
             }
             else
             {
