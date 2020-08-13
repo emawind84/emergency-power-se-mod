@@ -91,6 +91,10 @@ namespace IngameScript
         /// </summary>
         DateTime currentCycleStartTime;
         /// <summary>
+        /// The time the previous step ended
+        /// </summary>
+        DateTime previousStepEndTime;
+        /// <summary>
         /// The time to wait before starting the next cycle.
         /// Only used if <see cref="USE_REAL_TIME"/> is <c>true</c>.
         /// </summary>
@@ -230,6 +234,7 @@ namespace IngameScript
                 {
                     processSteps[processStep]();
                     processStep++;
+                    previousStepEndTime = DateTime.Now;
                     didAtLeastOneProcess = true;
                 } while (processStep < processSteps.Length && DoExecutionLimitCheck());
                 // if we get here it means we completed all the process steps
@@ -287,7 +292,7 @@ namespace IngameScript
             EchoR(string.Format("Used: {0}MW / {1}MW", Math.Round(actualCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
 
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, CollectSameConstruct);
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsWorking);
             if (actualCurrentOutput < MinimumOutputThreshold)
             {
                 EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentOutput, 2)));
@@ -314,7 +319,7 @@ namespace IngameScript
         void ProcessStepCheckBatteryStatus()
         {
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, CollectSameConstruct);
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsWorking);
             var capacity = RemainingBatteryCapacity(batteries);
             EchoR(string.Format("Batteries capacity: {0}%", Math.Round(capacity * 100, 0)));
 
@@ -335,13 +340,10 @@ namespace IngameScript
 
         void ProcessStepRechargeBatteries()
         {
+            RunEveryCycles(10);
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, CollectSameConstruct);
-            if (batteries.Count() == 0)
-            {
-                processStep++;
-                throw new PutOffExecutionException();
-            }
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsWorking);
+            if (batteries.Count() == 0) return;
 
             float remainingCapacity = RemainingBatteryCapacity(batteries);
 
@@ -368,8 +370,6 @@ namespace IngameScript
                         battery.ChargeMode = ChargeMode.Auto;
                     }
                 }
-
-                processStep++;
             }
         }
 
