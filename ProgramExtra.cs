@@ -64,7 +64,15 @@ namespace IngameScript
         {
             return block.IsSameConstructAs(Me);
         }
-        
+
+        void RunEveryCycles(int cycles)
+        {
+            if (DateTime.Now - previousStepEndTime > TimeSpan.FromMilliseconds(100) && totalCallCount % cycles != 0)
+            {
+                throw new PutOffExecutionException();
+            }
+        }
+
         /// <summary>
         /// Thrown when we detect that we have taken up too much processing time
         /// and need to put off the rest of the exection until the next call.
