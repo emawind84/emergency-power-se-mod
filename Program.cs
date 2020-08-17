@@ -23,7 +23,7 @@ namespace IngameScript
     {
         const string ScriptPrefixTag = "EPOWER";
 
-        const string DisplayTerminalTag = ScriptPrefixTag + ":DisplayTerminal";
+        const string DebugTerminalTag = ScriptPrefixTag + ":DebugTerminal";
 
         const string EmergencyPowerTag = ScriptPrefixTag + ":EmergencyPower";
 
@@ -82,7 +82,7 @@ namespace IngameScript
         /// <summary>
         /// Display for debug purpose
         /// </summary>
-        DisplayTerminal displayTerminals;
+        DebugTerminal debugTerminals;
 
         #region Script state & storage
 
@@ -177,7 +177,7 @@ namespace IngameScript
                 Echo(log);
             };
 
-            displayTerminals = new DisplayTerminal(this);
+            debugTerminals = new DebugTerminal(this);
             terminalCycle = SetTerminalCycle();
 
             // initialise the process steps we will need to do
@@ -279,9 +279,9 @@ namespace IngameScript
         {
             var currentGenerators = new List<IMyPowerProducer>();
             GridTerminalSystem.GetBlocksOfType(currentGenerators, blk => CollectSameConstruct(blk) && !(blk is IMyBatteryBlock) && blk.IsWorking);
-            float actualCurrentOutput = 0; float maxCurrentOutput = 0;
+            float actualCurrentAvailable = 0; float maxCurrentOutput = 0;
             currentGenerators.ForEach(generator => {
-                actualCurrentOutput += generator.MaxOutput;
+                actualCurrentAvailable += generator.MaxOutput;
                 if (generator is IMySolarPanel) {
                     maxCurrentOutput += 0.160f;
                 }
@@ -291,13 +291,13 @@ namespace IngameScript
                 }
             });
 
-            EchoR(string.Format("Used: {0}MW / {1}MW", Math.Round(actualCurrentOutput, 2), Math.Round(maxCurrentOutput, 2)));
+            EchoR(string.Format("Available: {0}MW / {1}MW", Math.Round(actualCurrentAvailable, 2), Math.Round(maxCurrentOutput, 2)));
 
             var batteries = new List<IMyBatteryBlock>();
             GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsWorking);
-            if (actualCurrentOutput < MinimumOutputThreshold)
+            if (actualCurrentAvailable < MinimumOutputThreshold)
             {
-                EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentOutput, 2)));
+                EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentAvailable, 2)));
                 batteries.ForEach(battery => {
                     if (battery.ChargeMode != ChargeMode.Recharge)
                     {
@@ -307,7 +307,7 @@ namespace IngameScript
                 EchoR("Batteries discharging");
             }
 
-            if (actualCurrentOutput > MinimumOutputThreshold)
+            if (actualCurrentAvailable > MinimumOutputThreshold)
             {
                 batteries.ForEach(battery => {
                     if (battery.ChargeMode != ChargeMode.Recharge)
@@ -383,7 +383,7 @@ namespace IngameScript
         {
             while (true)
             {
-                yield return displayTerminals.Run();
+                yield return debugTerminals.Run();
             }
         }
     }

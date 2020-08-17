@@ -24,10 +24,8 @@ namespace IngameScript
         /// <summary>
         /// Defines the <see cref="DebugTerminal" />.
         /// </summary>
-        class DisplayTerminal : Terminal<IMyTerminalBlock>
+        class DebugTerminal : Terminal<IMyTerminalBlock>
         {
-            public string Text { get; set; } = "";
-
             readonly Func<IMyTerminalBlock, bool> collect;
 
             /// <summary>
@@ -35,7 +33,7 @@ namespace IngameScript
             /// </summary>
             /// <param name="program">The program<see cref="Program"/>.</param>
             /// <param name="map">The map<see cref="Map"/>.</param>
-            public DisplayTerminal(Program program, Func<IMyTerminalBlock, bool> collect = null) : base(program)
+            public DebugTerminal(Program program, Func<IMyTerminalBlock, bool> collect = null) : base(program)
             {
                 if (collect != null)
                 {
@@ -43,7 +41,7 @@ namespace IngameScript
                 }
                 else
                 {
-                    this.collect = blk => MyIni.HasSection(blk.CustomData, DisplayTerminalTag);
+                    this.collect = blk => MyIni.HasSection(blk.CustomData, DebugTerminalTag);
                 }
             }
 
@@ -57,7 +55,7 @@ namespace IngameScript
 
                 MyIni ini = new MyIni();
                 ini.TryParse(block.CustomData);
-                var display = ini.Get(DisplayTerminalTag, "Display").ToInt16();
+                var display = ini.Get(DebugTerminalTag, "display").ToInt16();
 
                 IMyTextSurface lcd;
                 if (block is IMyTextSurfaceProvider)
@@ -70,7 +68,7 @@ namespace IngameScript
                 }
 
                 lcd.ContentType = ContentType.TEXT_AND_IMAGE;
-                lcd.WriteText(Text);
+                lcd.WriteText(Program.EchoOutput);
             }
 
             /// <summary>

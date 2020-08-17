@@ -38,7 +38,7 @@
   <Import Project="MDK/MDK.options.props" />
   <Import Project="MDK/MDK.paths.props" Condition="exists('MDK/MDK.paths.props')" />
   <ItemGroup>
-    <Compile Include="DisplayTerminal.cs" />
+    <Compile Include="DebugTerminal.cs" />
     <Compile Include="Terminal.cs" />
     <Compile Include="ProgramExtra.cs" />
     <Compile Include="MDK\Bootstrapper.cs" />
