@@ -23,6 +23,8 @@ namespace IngameScript
     {
         const string ScriptPrefixTag = "EPOWER";
 
+        const string DisplayTerminalTag = ScriptPrefixTag + ":DisplayTerminal";
+
         const string EmergencyPowerTag = ScriptPrefixTag + ":EmergencyPower";
 
         /// <summary>
