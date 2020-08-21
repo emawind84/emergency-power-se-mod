@@ -120,6 +120,7 @@ namespace IngameScript
 
         bool criticalBatteryCapacityDetected = false;
 
+        IEnumerator<IMyPowerProducer> powerProducerCycle;
         #endregion
 
         #region Version
@@ -186,6 +187,10 @@ namespace IngameScript
                 ProcessStepDischargeBatteriesOnLowCurrent,
                 ProcessStepCheckBatteryStatus,
                 ProcessStepRechargeBatteries,
+                ProcessStepUpdateBlockName,
+                ProcessStepUpdateBlockName,
+                ProcessStepUpdateBlockName,
+                ProcessStepUpdateBlockName
             };
 
             Runtime.UpdateFrequency = FREQUENCY;
@@ -371,6 +376,31 @@ namespace IngameScript
                     {
                         battery.ChargeMode = ChargeMode.Auto;
                     }
+                }
+            }
+        }
+
+        void ProcessStepUpdateBlockName()
+        {
+            if (powerProducerCycle == null)
+            {
+                var currentGenerators = new List<IMyPowerProducer>();
+                GridTerminalSystem.GetBlocksOfType(currentGenerators, blk => CollectSameConstruct(blk) && blk.IsFunctional);
+                powerProducerCycle = currentGenerators.GetEnumerator();
+            }
+
+            int cycleCount = 0;
+            while (cycleCount < 5)
+            {
+                if (powerProducerCycle.MoveNext())
+                {
+                    AddPowerCapacityToGeneratorBlockName(powerProducerCycle.Current);
+                }
+                else
+                {
+                    powerProducerCycle.Dispose();
+                    powerProducerCycle = null;
+                    break;
                 }
             }
         }

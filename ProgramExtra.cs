@@ -73,6 +73,26 @@ namespace IngameScript
             }
         }
 
+        void AddPowerCapacityToGeneratorBlockName(IMyPowerProducer generator)
+        {
+            float availablePower = 100f;
+            if (generator is IMyBatteryBlock)
+            {
+                var storedPower = (generator as IMyBatteryBlock).CurrentStoredPower;
+                var maxPower = (generator as IMyBatteryBlock).MaxStoredPower;
+                availablePower = storedPower / maxPower * 100;
+            }
+            else if (generator is IMySolarPanel)
+            {
+                availablePower = (generator as IMySolarPanel).MaxOutput / 0.160f * 100;
+            }
+            if (!generator.IsWorking) availablePower = 0;
+
+            var idx = generator.CustomName.Trim().LastIndexOf('[');
+            if (idx == -1) idx = generator.CustomName.Count();
+            generator.CustomName = string.Format("{0} [{1}%]", generator.CustomName.Substring(0, idx).Trim(), Math.Round(availablePower).ToString());
+        }
+
         /// <summary>
         /// Thrown when we detect that we have taken up too much processing time
         /// and need to put off the rest of the exection until the next call.
