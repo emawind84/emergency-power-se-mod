@@ -21,6 +21,8 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
+        #region mdk preserve
+
         const string ScriptPrefixTag = "EPOWER";
 
         string DebugTerminalTag = ScriptPrefixTag + ":DebugTerminal";
@@ -29,29 +31,23 @@ namespace IngameScript
 
         bool DisplayPowerCapacityOnBlockName = false;
 
-        /// <summary>
-        /// The minimum current that power generators should provide 
-        /// before batteries get activated and discharged to provide enough current to the grid and the value is in Megawatts
-        /// </summary>
+        // The minimum current that power generators should provide before batteries get activated and discharged to provide enough current to the grid and the value is in Megawatts
         float MinimumOutputThreshold = 1.5f;
-        /// <summary>
-        /// If the batteries go below this threshold reactors will be turned on in order to charge batteries and give enough power to the grid
-        /// </summary>
+        
+        // If the batteries go below this threshold reactors will be turned on in order to charge batteries and give enough power to the grid
         float CriticalBatteryCapacity = 0.2f;
-        /// <summary>
-        /// The overall batteries capacity in order to consider them charged
-        /// </summary>
+        
+        // The overall batteries capacity in order to consider them charged
         float ChargedBatteryCapacity = 0.8f;
-
-        /// <summary>
-        /// whether to use real time (second between calls) or pure UpdateFrequency
-        /// for update frequency
-        /// </summary>
+        
+        // whether to use real time (second between calls) or pure UpdateFrequency for update frequency
         readonly bool USE_REAL_TIME = false;
-        /// <summary>
-        /// Defines the FREQUENCY.
-        /// </summary>
+
+        // Defines the FREQUENCY.
         const UpdateFrequency FREQUENCY = UpdateFrequency.Update100;
+
+        #endregion
+
         /// <summary>
         /// How often the script should update in milliseconds
         /// </summary>
