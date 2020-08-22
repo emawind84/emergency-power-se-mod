@@ -23,9 +23,11 @@ namespace IngameScript
     {
         const string ScriptPrefixTag = "EPOWER";
 
-        const string DebugTerminalTag = ScriptPrefixTag + ":DebugTerminal";
+        string DebugTerminalTag = ScriptPrefixTag + ":DebugTerminal";
 
-        const string EmergencyPowerTag = ScriptPrefixTag + ":EmergencyPower";
+        string EmergencyPowerTag = ScriptPrefixTag + ":EmergencyPower";
+
+        bool DisplayPowerCapacityOnBlockName = false;
 
         /// <summary>
         /// The minimum current that power generators should provide 
@@ -188,9 +190,6 @@ namespace IngameScript
                 ProcessStepCheckBatteryStatus,
                 ProcessStepRechargeBatteries,
                 ProcessStepUpdateBlockName,
-                ProcessStepUpdateBlockName,
-                ProcessStepUpdateBlockName,
-                ProcessStepUpdateBlockName
             };
 
             Runtime.UpdateFrequency = FREQUENCY;
@@ -382,6 +381,8 @@ namespace IngameScript
 
         void ProcessStepUpdateBlockName()
         {
+            if (!DisplayPowerCapacityOnBlockName) return;
+
             if (powerProducerCycle == null)
             {
                 var currentGenerators = new List<IMyPowerProducer>();
