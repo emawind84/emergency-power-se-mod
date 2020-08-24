@@ -294,13 +294,14 @@ namespace IngameScript
             EchoR(string.Format("Available: {0}MW / {1}MW", Math.Round(actualCurrentAvailable, 2), Math.Round(maxCurrentOutput, 2)));
 
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional && blk.Enabled);
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional);
             if (actualCurrentAvailable < MinimumOutputThreshold)
             {
                 EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentAvailable, 2)));
                 batteries.ForEach(battery => {
                     if (battery.ChargeMode != ChargeMode.Recharge)
                     {
+                        battery.Enabled = true;
                         battery.ChargeMode = ChargeMode.Discharge;
                     }
                 });
@@ -312,6 +313,7 @@ namespace IngameScript
                 batteries.ForEach(battery => {
                     if (battery.ChargeMode != ChargeMode.Recharge)
                     {
+                        battery.Enabled = false;
                         battery.ChargeMode = ChargeMode.Auto;
                     }
                 });
@@ -321,7 +323,7 @@ namespace IngameScript
         void ProcessStepCheckBatteryStatus()
         {
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional && blk.Enabled);
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional);
             var capacity = RemainingBatteryCapacity(batteries);
             EchoR(string.Format("Batteries capacity: {0}%", Math.Round(capacity * 100, 0)));
 
@@ -344,7 +346,7 @@ namespace IngameScript
         {
             RunEveryCycles(10);
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional && blk.Enabled);
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional);
             if (batteries.Count() == 0) return;
 
             float remainingCapacity = RemainingBatteryCapacity(batteries);
@@ -359,6 +361,7 @@ namespace IngameScript
                 }
                 foreach (var battery in batteries.Take(batteriesToCharge))
                 {
+                    battery.Enabled = true;
                     battery.ChargeMode = ChargeMode.Recharge;
                 }
                 EchoR(string.Format("Charging batteries: {0}%", Math.Round(remainingCapacity * 100, 0)));
@@ -369,6 +372,7 @@ namespace IngameScript
                 {
                     if (battery.ChargeMode != ChargeMode.Discharge)
                     {
+                        battery.Enabled = false;
                         battery.ChargeMode = ChargeMode.Auto;
                     }
                 }
@@ -382,7 +386,7 @@ namespace IngameScript
             if (powerProducerCycle == null)
             {
                 var currentGenerators = new List<IMyPowerProducer>();
-                GridTerminalSystem.GetBlocksOfType(currentGenerators, blk => CollectSameConstruct(blk) && blk.IsFunctional && blk.Enabled);
+                GridTerminalSystem.GetBlocksOfType(currentGenerators, blk => CollectSameConstruct(blk) && blk.IsFunctional);
                 powerProducerCycle = currentGenerators.GetEnumerator();
             }
 
