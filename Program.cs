@@ -301,7 +301,6 @@ namespace IngameScript
                 batteries.ForEach(battery => {
                     if (battery.ChargeMode != ChargeMode.Recharge)
                     {
-                        battery.Enabled = true;
                         battery.ChargeMode = ChargeMode.Discharge;
                     }
                 });
@@ -311,11 +310,7 @@ namespace IngameScript
             if (actualCurrentAvailable > MinimumOutputThreshold)
             {
                 batteries.ForEach(battery => {
-                    if (battery.ChargeMode != ChargeMode.Recharge)
-                    {
-                        battery.Enabled = false;
-                        battery.ChargeMode = ChargeMode.Auto;
-                    }
+                    battery.ChargeMode = ChargeMode.Recharge;
                 });
             }
         }
@@ -361,7 +356,6 @@ namespace IngameScript
                 }
                 foreach (var battery in batteries.Take(batteriesToCharge))
                 {
-                    battery.Enabled = true;
                     battery.ChargeMode = ChargeMode.Recharge;
                 }
                 EchoR(string.Format("Charging batteries: {0}%", Math.Round(remainingCapacity * 100, 0)));
@@ -372,8 +366,7 @@ namespace IngameScript
                 {
                     if (battery.ChargeMode != ChargeMode.Discharge)
                     {
-                        battery.Enabled = false;
-                        battery.ChargeMode = ChargeMode.Auto;
+                        battery.ChargeMode = ChargeMode.Recharge;
                     }
                 }
             }
