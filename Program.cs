@@ -294,7 +294,7 @@ namespace IngameScript
             EchoR(string.Format("Available: {0}MW / {1}MW", Math.Round(actualCurrentAvailable, 2), Math.Round(maxCurrentOutput, 2)));
 
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional);
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional && blk.Enabled);
             if (actualCurrentAvailable < MinimumOutputThreshold)
             {
                 EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentAvailable, 2)));
@@ -321,7 +321,7 @@ namespace IngameScript
         void ProcessStepCheckBatteryStatus()
         {
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional);
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional && blk.Enabled);
             var capacity = RemainingBatteryCapacity(batteries);
             EchoR(string.Format("Batteries capacity: {0}%", Math.Round(capacity * 100, 0)));
 
@@ -344,7 +344,7 @@ namespace IngameScript
         {
             RunEveryCycles(10);
             var batteries = new List<IMyBatteryBlock>();
-            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional);
+            GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional && blk.Enabled);
             if (batteries.Count() == 0) return;
 
             float remainingCapacity = RemainingBatteryCapacity(batteries);
@@ -382,7 +382,7 @@ namespace IngameScript
             if (powerProducerCycle == null)
             {
                 var currentGenerators = new List<IMyPowerProducer>();
-                GridTerminalSystem.GetBlocksOfType(currentGenerators, blk => CollectSameConstruct(blk) && blk.IsFunctional);
+                GridTerminalSystem.GetBlocksOfType(currentGenerators, blk => CollectSameConstruct(blk) && blk.IsFunctional && blk.Enabled);
                 powerProducerCycle = currentGenerators.GetEnumerator();
             }
 
