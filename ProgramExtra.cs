@@ -22,6 +22,17 @@ namespace IngameScript
 
     partial class Program : MyGridProgram
     {
+        void RetrieveCustomSetting()
+        {
+            // init settings
+            _ini.TryParse(Me.CustomData);
+
+            MinimumOutputThreshold = _ini.Get(ScriptPrefixTag, "MinimumOutputThreshold").ToSingle(1.5f);
+            CriticalBatteryCapacity = _ini.Get(ScriptPrefixTag, "CriticalBatteryCapacity").ToSingle(0.2f);
+            ChargedBatteryCapacity = _ini.Get(ScriptPrefixTag, "ChargedBatteryCapacity").ToSingle(0.8f);
+            DisplayPowerCapacityOnBlockName = _ini.Get(ScriptPrefixTag, "DisplayPowerCapacity").ToBoolean(false);
+        }
+
         static float RemainingBatteryCapacity(List<IMyBatteryBlock> batteries)
         {
             float totalStoredPower = 0; float totalMaxStoredPower = 0;
@@ -91,6 +102,11 @@ namespace IngameScript
             var idx = generator.CustomName.Trim().LastIndexOf('[');
             if (idx == -1) idx = generator.CustomName.Count();
             generator.CustomName = string.Format("{0} [{1}%]", generator.CustomName.Substring(0, idx).Trim(), Math.Round(availablePower).ToString());
+        }
+
+        int SortByStoredPower(IMyBatteryBlock b1, IMyBatteryBlock b2)
+        {
+            return b1.CurrentStoredPower.CompareTo(b2.CurrentStoredPower);
         }
 
         /// <summary>

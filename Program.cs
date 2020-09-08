@@ -85,6 +85,10 @@ namespace IngameScript
         #region Script state & storage
 
         /// <summary>
+        /// Handle Custom Data settings
+        /// </summary>
+        MyIni _ini = new MyIni();
+        /// <summary>
         /// The time we started the last cycle at.
         /// If <see cref="USE_REAL_TIME"/> is <c>true</c>, then it is also used to track
         /// when the script should next update
@@ -125,11 +129,11 @@ namespace IngameScript
 
         const string SCRIPT_NAME = "ED's Emergency Power";
         // current script version
-        const int VERSION_MAJOR = 1, VERSION_MINOR = 0, VERSION_REVISION = 6;
+        const int VERSION_MAJOR = 1, VERSION_MINOR = 0, VERSION_REVISION = 7;
         /// <summary>
         /// Current script update time.
         /// </summary>
-        const string VERSION_UPDATE = "2020-08-13";
+        const string VERSION_UPDATE = "2020-09-08";
         /// <summary>
         /// A formatted string of the script version.
         /// </summary>
@@ -176,6 +180,7 @@ namespace IngameScript
                 Echo(log);
             };
 
+            RetrieveCustomSetting();
             debugTerminals = new DebugTerminal(this);
             terminalCycle = SetTerminalCycle();
 
@@ -194,11 +199,6 @@ namespace IngameScript
 
             // format terminal info text
             scriptUpdateText = string.Format(FORMAT_UPDATE_TEXT, SCRIPT_NAME, VERSION_NICE_TEXT);
-        }
-
-        public void Save()
-        {
-            
         }
 
         public void Main(string argument, UpdateType updateSource)
@@ -342,6 +342,8 @@ namespace IngameScript
             RunEveryCycles(10);
             var batteries = new List<IMyBatteryBlock>();
             GridTerminalSystem.GetBlocksOfType(batteries, blk => CollectSameConstruct(blk) && blk.IsFunctional);
+            batteries.Sort(SortByStoredPower);
+
             if (batteries.Count() == 0) return;
 
             float remainingCapacity = RemainingBatteryCapacity(batteries);
