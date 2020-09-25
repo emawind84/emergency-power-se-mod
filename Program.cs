@@ -189,7 +189,7 @@ namespace IngameScript
             {
                 ProcessStepDischargeBatteriesOnLowCurrent,
                 ProcessStepCheckBatteryStatus,
-                ProcessStepRechargeBatteries,
+                //ProcessStepRechargeBatteries,
                 ProcessStepUpdateBlockName,
             };
 
@@ -299,10 +299,7 @@ namespace IngameScript
             {
                 EchoR(string.Format("Low current detected: {0} MW", Math.Round(actualCurrentAvailable, 2)));
                 batteries.ForEach(battery => {
-                    if (battery.ChargeMode != ChargeMode.Recharge)
-                    {
-                        battery.ChargeMode = ChargeMode.Discharge;
-                    }
+                    battery.ChargeMode = ChargeMode.Discharge;
                 });
                 EchoR("Batteries discharging");
             }
