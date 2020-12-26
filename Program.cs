@@ -129,11 +129,11 @@ namespace IngameScript
 
         const string SCRIPT_NAME = "ED's Emergency Power";
         // current script version
-        const int VERSION_MAJOR = 1, VERSION_MINOR = 0, VERSION_REVISION = 8;
+        const int VERSION_MAJOR = 1, VERSION_MINOR = 0, VERSION_REVISION = 9;
         /// <summary>
         /// Current script update time.
         /// </summary>
-        const string VERSION_UPDATE = "2020-09-16";
+        const string VERSION_UPDATE = "2020-12-26";
         /// <summary>
         /// A formatted string of the script version.
         /// </summary>
@@ -348,12 +348,7 @@ namespace IngameScript
             if (remainingCapacity < CriticalBatteryCapacity
                 || (remainingCapacity < ChargedBatteryCapacity && criticalBatteryCapacityDetected))
             {
-                var batteriesToCharge = batteries.Count == 1 ? batteries.Count : batteries.Count - 1;
-                foreach (var battery in batteries.Skip(batteriesToCharge))
-                {
-                    battery.ChargeMode = ChargeMode.Auto;
-                }
-                foreach (var battery in batteries.Take(batteriesToCharge))
+                foreach (var battery in batteries)
                 {
                     battery.ChargeMode = ChargeMode.Recharge;
                 }
